@@ -49,10 +49,10 @@ function blobToBase64(blob) {
 
 /**
  * Resizes an image to fit a target aspect ratio by adding black bars (letterboxing/pillarboxing).
- * @param base64 The base64 string of the source image.
- * @param mimeType The MIME type of the source image.
- * @param targetAspectRatioString The target aspect ratio ('16:9' or '9:16').
- * @returns A promise that resolves to an object with the new base64 and mimeType.
+ * @param {string} base64 The base64 string of the source image.
+ * @param {string} mimeType The MIME type of the source image.
+ * @param {'16:9' | '9:16'} targetAspectRatioString The target aspect ratio ('16:9' or '9:16').
+ * @returns {Promise<{ base64: string; mimeType: string }>} A promise that resolves to an object with the new base64 and mimeType.
  */
 async function resizeImageToFitAspectRatio(
     base64,
@@ -110,10 +110,10 @@ async function resizeImageToFitAspectRatio(
 
 /**
  * Resizes an image from a data URL to specific dimensions.
- * @param imageUrl The data URL of the source image.
- * @param targetWidth The target width.
- * @param targetHeight The target height.
- * @returns A promise that resolves to the data URL of the resized image.
+ * @param {string} imageUrl The data URL of the source image.
+ * @param {number} targetWidth The target width.
+ * @param {number} targetHeight The target height.
+ * @returns {Promise<string>} A promise that resolves to the data URL of the resized image.
  */
 async function resizeImageToDimensions(imageUrl, targetWidth, targetHeight) {
     return new Promise((resolve, reject) => {
@@ -156,6 +156,8 @@ const lightboxClose = document.querySelector('.lightbox-close');
 const safetyLevelSelect = document.querySelector('#safety-level-select');
 const safetyWarning = document.querySelector('#safety-warning');
 const themeToggle = document.querySelector('#theme-toggle');
+const installPwaButton = document.querySelector('#install-pwa-button');
+
 
 // New UI Elements for Tabs & Controls
 const mainTabs = document.querySelectorAll('.main-tabs .tab-button');
@@ -999,10 +1001,10 @@ function getSafetySettings() {
 /**
  * Creates a single source image for inpainting by punching a transparent hole
  * in the original image based on the user's mask.
- * @param originalBase64 The base64 string of the original image.
- * @param originalMimeType The MIME type of the original image.
- * @param maskCanvasEl The canvas element containing the user's drawn mask.
- * @returns A promise that resolves to the base64 string of the new source image.
+ * @param {string} originalBase64 The base64 string of the original image.
+ * @param {string} originalMimeType The MIME type of the original image.
+ * @param {HTMLCanvasElement} maskCanvasEl The canvas element containing the user's drawn mask.
+ * @returns {Promise<string>} A promise that resolves to the base64 string of the new source image.
  */
 async function prepareInpaintingSource(originalBase64, originalMimeType, maskCanvasEl) {
     return new Promise((resolve, reject) => {
@@ -1389,6 +1391,46 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// --- PWA Install Handling ---
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  // Update UI to notify the user they can install the PWA
+  if (installPwaButton) {
+    installPwaButton.style.display = 'inline-flex';
+  }
+});
+
+if (installPwaButton) {
+  installPwaButton.addEventListener('click', async () => {
+    // Hide the app provided install promotion
+    installPwaButton.style.display = 'none';
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    // We've used the prompt, and can't use it again, throw it away
+    deferredPrompt = null;
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  // Hide the app-provided install promotion
+  if (installPwaButton) {
+      installPwaButton.style.display = 'none';
+  }
+  // Clear the deferredPrompt so it can be garbage collected
+  deferredPrompt = null;
+  console.log('PWA was installed');
+  // Optionally, send an analytics event to indicate successful install
+});
+
 
 // Initial App setup
 function initializeApp() {
