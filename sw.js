@@ -1,6 +1,6 @@
+
 const CACHE_NAME = 'yiyo-ai-v1';
 const urlsToCache = [
-    '/',
     'index.html',
     'manifest.json',
     'index.css',
