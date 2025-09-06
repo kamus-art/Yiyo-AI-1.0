@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yiyo AI 1.0 - Creador de Medios</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.16.0"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="main-app">
+    <div class="container">
+      <header class="header">
+        <div>
+          <h1>Yiyo AI 1.0</h1>
+          <p class="subtitle">Crea y edita imágenes y videos con IA</p>
+        </div>
+        <div class="header-actions">
+          <button id="api-key-button" class="button-secondary">Registro</button>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="controls-container">
+        <div class="main-tabs">
+          <button class="tab-button active" data-mode="generate">Generar</button>
+          <button class="tab-button" id="edit-tab-button" data-mode="edit" disabled>Editar</button>
+        </div>
+
+        <!-- GENERATE CONTROLS -->
+        <div id="generate-controls">
+          <div class="sub-tabs">
+            <button class="sub-tab-button active" data-generate-mode="image">Imagen</button>
+            <button class="sub-tab-button" data-generate-mode="video">Video</button>
+          </div>
+          <div id="generate-image-controls">
+            <div class="form-group">
+                  <div class="form-label-group">
+                      <label for="image-count-slider">Número de Imágenes</label>
+                      <span id="image-count-value">1</span>
+                  </div>
+                  <input type="range" id="image-count-slider" class="slider" min="1" max="4" value="1">
+              </div>
+              <div class="form-group aspect-ratio-selector">
+                  <label>Relación de Aspecto</label>
+                  <div class="aspect-ratio-group">
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-1-1" name="aspect-ratio" value="1:1" checked>
+                          <label for="ar-1-1"><span class="shape shape-1-1"></span></label>
+                          <span class="aspect-ratio-text">1:1</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-4-3" name="aspect-ratio" value="4:3">
+                          <label for="ar-4-3"><span class="shape shape-4-3"></span></label>
+                          <span class="aspect-ratio-text">4:3</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-3-4" name="aspect-ratio" value="3:4">
+                          <label for="ar-3-4"><span class="shape shape-3-4"></span></label>
+                          <span class="aspect-ratio-text">3:4</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-16-9" name="aspect-ratio" value="16:9">
+                          <label for="ar-16-9"><span class="shape shape-16-9"></span></label>
+                          <span class="aspect-ratio-text">16:9</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-9-16" name="aspect-ratio" value="9:16">
+                          <label for="ar-9-16"><span class="shape shape-9-16"></span></label>
+                          <span class="aspect-ratio-text">9:16</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div id="generate-video-controls" style="display: none;">
+              <div class="form-group aspect-ratio-selector">
+                  <label>Relación de Aspecto (la salida de video será 16:9 o 9:16)</label>
+                  <div class="aspect-ratio-group">
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-video-1-1" name="aspect-ratio-video" value="1:1">
+                          <label for="ar-video-1-1"><span class="shape shape-1-1"></span></label>
+                          <span class="aspect-ratio-text">1:1</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-video-4-3" name="aspect-ratio-video" value="4:3">
+                          <label for="ar-video-4-3"><span class="shape shape-4-3"></span></label>
+                          <span class="aspect-ratio-text">4:3</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-video-3-4" name="aspect-ratio-video" value="3:4">
+                          <label for="ar-video-3-4"><span class="shape shape-3-4"></span></label>
+                          <span class="aspect-ratio-text">3:4</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-video-16-9" name="aspect-ratio-video" value="16:9" checked>
+                          <label for="ar-video-16-9"><span class="shape shape-16-9"></span></label>
+                          <span class="aspect-ratio-text">16:9</span>
+                      </div>
+                      <div class="aspect-ratio-item">
+                          <input type="radio" id="ar-video-9-16" name="aspect-ratio-video" value="9:16">
+                          <label for="ar-video-9-16"><span class="shape shape-9-16"></span></label>
+                          <span class="aspect-ratio-text">9:16</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+
+        <!-- EDIT CONTROLS -->
+        <div id="edit-controls" style="display: none;">
+          <div class="sub-tabs">
+            <button class="sub-tab-button active" data-edit-mode="ia">IA General</button>
+            <button class="sub-tab-button" data-edit-mode="inpaint">Inpainting</button>
+            <button class="sub-tab-button" data-edit-mode="upscale">Ampliar</button>
+          </div>
+          <div id="edit-inpaint-controls" style="display: none;">
+              <div class="form-group inpaint-mode-selector">
+                  <label>Modo de Edición</label>
+                  <div class="radio-toggle-group">
+                      <input type="radio" id="inpaint-mode-inpaint" name="inpaint-mode" value="inpaint" checked>
+                      <label for="inpaint-mode-inpaint">Retocar / Reemplazar</label>
+                  </div>
+                  <p id="inpaint-mode-description">Pinta una máscara sobre el área que quieres modificar y describe el cambio.</p>
+              </div>
+              <div id="inpaint-options">
+                  <div class="form-group">
+                      <div class="form-label-group">
+                          <label for="creativity-slider">Nivel de Creatividad</label>
+                          <span id="creativity-value">Medio</span>
+                      </div>
+                      <input type="range" id="creativity-slider" class="slider" min="0" max="1" value="0.5" step="0.1">
+                  </div>
+                  <button id="open-editor-button" class="button-secondary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                      Abrir Editor de Máscara
+                  </button>
+              </div>
+          </div>
+          <div id="upscale-controls" style="display: none;">
+              <div class="form-group">
+                  <div class="form-label-group">
+                      <label for="upscale-slider">Porcentaje de Ampliación</label>
+                      <span id="upscale-value">200</span>%
+                  </div>
+                  <input type="range" id="upscale-slider" class="slider" min="125" max="400" value="200" step="25">
+              </div>
+          </div>
+        </div>
+
+        <hr class="control-separator">
+
+        <!-- COMMON CONTROLS -->
+        <div class="form-group">
+          <label for="file-input-1">Sube una imagen (Opcional para generar, requerido para editar)</label>
+          <div class="file-upload-wrapper">
+            <label for="file-input-1" class="file-upload-button">Seleccionar archivo</label>
+            <input id="file-input-1" type="file" accept="image/*">
+            <span id="file-name-1">Ningún archivo seleccionado</span>
+          </div>
+        </div>
+
+        <div class="image-previews">
+          <div id="editor-wrapper" style="display: none;">
+              <img id="img-1" src="" alt="Vista previa de la imagen cargada">
+              <canvas id="preview-mask-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label-group">
+            <label for="prompt-input">Prompt</label>
+            <button id="enhance-prompt-button" class="icon-button" aria-label="Enhance prompt">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>
+            </button>
+          </div>
+          <textarea id="prompt-input" rows="4" placeholder="Ej: Un astronauta montando un caballo en el espacio, cinematográfico, 8k..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="safety-level-select">Nivel de Seguridad</label>
+          <select id="safety-level-select" class="select-input">
+            <option value="BLOCK_ONLY_HIGH">Bloquear solo alto</option>
+            <option value="BLOCK_MEDIUM_AND_ABOVE" selected>Bloquear medio y superior</option>
+            <option value="BLOCK_LOW_AND_ABOVE">Bloquear bajo y superior</option>
+            <option value="BLOCK_NONE">No bloquear</option>
+          </select>
+          <p id="safety-warning" class="safety-warning" hidden>Advertencia: Seleccionar "No bloquear" puede resultar en contenido que no es apropiado para todas las audiencias.</p>
+        </div>
+
+        <div class="action-buttons-container">
+          <button id="generate-image-button" class="button-primary" disabled>Generar Imagen</button>
+          <button id="generate-video-button" class="button-primary" style="display: none;" disabled>Generar Video</button>
+          <button id="edit-image-button" class="button-primary" style="display: none;" disabled>Editar Imagen</button>
+          <button id="upscale-image-button" class="button-primary" style="display: none;" disabled>Ampliar Imagen</button>
+        </div>
+      </div>
+
+      <div id="status-container"></div>
+      <div id="video-status-container"></div>
+
+      <div class="video-container">
+        <video id="video" controls></video>
+      </div>
+      <button id="download-button" class="button-primary">Descargar Video</button>
+
+      <div id="edited-image-container" hidden>
+          <h2>Resultados</h2>
+          <div id="edited-image-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" class="lightbox-content">
+  </div>
+
+  <div id="editor-modal">
+    <div id="editor-toolbar">
+        <div class="button-row">
+            <button id="editor-brush-toggle" class="icon-button active" aria-label="Toggle Brush" title="Pincel / Mover (Barra espaciadora)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <div class="brush-size-control">
+                <label for="editor-brush-size">Tamaño: <span id="editor-brush-size-value">40px</span></label>
+                <input type="range" id="editor-brush-size" class="slider" min="5" max="100" value="40">
+            </div>
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="button-row">
+          <label>Zoom: <span id="editor-zoom-indicator">100%</span></label>
+          <button id="zoom-in-button" class="icon-button" aria-label="Zoom In"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></button>
+          <button id="zoom-out-button" class="icon-button" aria-label="Zoom Out"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></button>
+          <button id="zoom-reset-button" class="icon-button" aria-label="Reset Zoom"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6"></path><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg></button>
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="button-row">
+            <button id="editor-clear-button" class="button-secondary">Limpiar</button>
+        </div>
+        <div class="editor-actions">
+            <button id="editor-close-button" class="button-secondary">Cancelar</button>
+            <button id="editor-save-button" class="button-primary">Guardar</button>
+        </div>
+    </div>
+    <div id="editor-viewport">
+        <div id="editor-canvas-container">
+            <img id="editor-image" src="" alt="Imagen para enmascarar">
+            <canvas id="editor-mask-canvas"></canvas>
+        </div>
+        <div id="editor-brush-cursor"></div>
+    </div>
+  </div>
+
+  <!-- API Key Modal -->
+  <div id="api-key-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button id="api-key-close-button" class="modal-close-button">&times;</button>
+      <h2>Registra tu API Key</h2>
+      <p class="modal-description">Para usar la aplicación, pega tu API Key de Google AI a continuación.</p>
+      
+      <div class="api-key-form">
+        <input type="password" id="api-key-input" class="api-key-input-field" placeholder="Pega tu API Key aquí">
+        <button id="api-key-accept-button" class="button-primary">Aceptar</button>
+      </div>
+
+      <div class="api-instructions-container">
+        <h3>¿Cómo obtengo una API Key?</h3>
+        <ol>
+            <li>Ingresa a <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">aistudio.google.com</a>.</li>
+            <li>Inicia sesión con tu cuenta de Google.</li>
+            <li>Haz clic en <strong>"Get API key"</strong>.</li>
+            <li>Selecciona <strong>"Create API key in new project"</strong>.</li>
+            <li>Copia la clave generada y pégala arriba.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+
+  <canvas id="mask-canvas" hidden></canvas>
+  <script type="module" src="index.tsx"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Yiyo AI 1.0",
+  "short_name": "Yiyo AI",
+  "description": "Crea y edita imágenes y videos con IA",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
