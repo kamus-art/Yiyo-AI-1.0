@@ -1,5 +1,3 @@
-/// <reference lib="dom" />
-/* tslint:disable */
 /**
  * @license
  * Copyright 2025 Google LLC
@@ -18,7 +16,6 @@ const MAX_RETRIES = 10;
 let currentMode = 'generate';
 let generateMode = 'image';
 let editMode = 'ia';
-let inpaintMode = 'inpaint';
 let creativityLevel = 0.5;
 let apiKey = null;
 
@@ -1304,7 +1301,6 @@ async function generateVideo() {
 
       const ai = new GoogleGenAI({ apiKey });
       
-      // FIX: The 'safetySettings' property is not valid for the 'generateVideos' config.
       const params = {
         model: 'veo-2.0-generate-001',
         prompt: prompt,
